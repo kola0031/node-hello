@@ -46,8 +46,8 @@ jobs:
       - name: Run SonarQube Analysis
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=Netflix \
-            -Dsonar.projectName=Netflix \
+            -Dsonar.projectKey=sonar \
+            -Dsonar.projectName=sonar \
             -Dsonar.sources=. \
             -Dsonar.host.url=http://localhost:9000/ \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
