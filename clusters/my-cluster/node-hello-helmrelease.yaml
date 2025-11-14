@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: node-hello
+  namespace: default
+spec:
+  interval: 5m0s
+  chart:
+    spec:
+      chart: ./node-hello
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+      interval: 1m0s
+  values:
+    image:
+      repository: kola0031/node-hello
+      tag: latest
+    service:
+      port: 80
+      targetPort: 3000
+    replicaCount: 2
+

@@ -55,6 +55,8 @@ service:
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
+  # Container port where the application listens
+  targetPort: 3000
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
@@ -90,10 +92,14 @@ livenessProbe:
   httpGet:
     path: /
     port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
 readinessProbe:
   httpGet:
     path: /
     port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
 
 # This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
