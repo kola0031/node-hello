@@ -1,18 +1,68 @@
-name: Docker Image CI
+name: node-hello Docker Image
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - main
 
 jobs:
-
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+  sonar:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up SonarQube Scanner
+        uses: warchant/setup-sonar-scanner@v7
+
+      - name: Run SonarQube Analysis
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=Netflix \
+            -Dsonar.projectName=Netflix \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://sonarqube-sonarqube.sonarqube.svc.cluster.local:9000/ \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+
+
+      # Run Trivy scan on the filesystem
+      - name: Run Trivy File System Scan
+        run: |
+          mkdir -p reports  # Ensure the reports directory exists
+          trivy fs . > reports/trivyfs.txt
+
+  docker_build:
+    runs-on: self-hosted
+    needs: [build, sonar]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build & Push Docker Image
+        run: |
+          docker build -t node-hello .
+          docker tag node-hello kola0031/node-hello:latest
+          docker push kola0031/node-hello:latest
