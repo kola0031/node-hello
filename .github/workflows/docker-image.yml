@@ -1,6 +1,16 @@
 name: node-hello Docker Image
 
 on:
+  workflow_dispatch:
+    
+    inputs:
+      branch_name:
+        description: "The branch name to build"
+        required: true
+        default: "main"
+        type: string
+
+on:
   push:
     branches:
       - main
