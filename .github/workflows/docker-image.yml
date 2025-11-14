@@ -78,6 +78,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build & Push Docker Image
+      - name: Build & Push Docker Image (Multi-arch)
         run: |
-          docker buildx build --platform linux/arm64 -t kola0031/node-hello:latest --push .
+          docker buildx build --platform linux/amd64,linux/arm64 -t kola0031/node-hello:latest --push .
